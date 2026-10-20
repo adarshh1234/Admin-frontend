@@ -4,11 +4,13 @@ export interface SectionVisibility {
   statsAndShift: boolean;
   coreFeatures: boolean;
   dimensions: boolean;
+  exploreOpportunities?: boolean;
   blogMatrix: boolean;
   videoHub: boolean;
   whyAndTestimonials: boolean;
   finalCTA: boolean;
 }
+
 
 export interface NavLinkItem {
   label: string;
@@ -222,6 +224,31 @@ export interface FooterContent {
   socialLinks: SocialLinkItem[];
 }
 
+export interface OpportunityItem {
+  id: string;
+  title: string;
+  rate: string;
+  category: string;
+  statusType: 'new' | 'hired' | 'active' | 'urgent';
+  statusText?: string;
+  hiredCount?: string;
+  referralBonus?: string;
+  isOneClickApply?: boolean;
+  location?: string;
+  tags?: string[];
+  description?: string;
+}
+
+export interface ExploreOpportunitiesContent {
+  sectionTag: string;
+  title: string;
+  titleHighlight: string;
+  subtitle: string;
+  searchPlaceholder: string;
+  categories: string[];
+  opportunities: OpportunityItem[];
+}
+
 export interface LandingPageCmsData {
   status: 'draft' | 'published';
   publishedAt?: string;
@@ -233,6 +260,7 @@ export interface LandingPageCmsData {
   statsAndShift: StatsAndShiftContent;
   corePlatformOS: CorePlatformOSContent;
   dimensionsOfTalent: DimensionsOfTalentContent;
+  exploreOpportunities?: ExploreOpportunitiesContent;
   blogMatrix: BlogMatrixContent;
   videoContent: VideoContentSectionContent;
   whyAndTestimonials: WhyAndTestimonialsContent;

@@ -82,9 +82,14 @@ export const ChartOfAccounts: React.FC = () => {
   };
 
   // Build Hierarchical Tree
-  const buildTree = () => {
-    const map: Record<string, { account: AccountingAccount; children: any[] }> = {};
-    const roots: any[] = [];
+  interface AccountTreeNode {
+    account: AccountingAccount;
+    children: AccountTreeNode[];
+  }
+
+  const buildTree = (): AccountTreeNode[] => {
+    const map: Record<string, AccountTreeNode> = {};
+    const roots: AccountTreeNode[] = [];
 
     accounts.forEach((acc) => {
       map[acc.name] = { account: acc, children: [] };
@@ -93,7 +98,7 @@ export const ChartOfAccounts: React.FC = () => {
     accounts.forEach((acc) => {
       if (acc.parent_account && map[acc.parent_account]) {
         map[acc.parent_account].children.push(map[acc.name]);
-      } else {
+      } else if (map[acc.name]) {
         roots.push(map[acc.name]);
       }
     });
@@ -101,7 +106,7 @@ export const ChartOfAccounts: React.FC = () => {
     return roots;
   };
 
-  const renderTreeNode = (node: any, level = 0) => {
+  const renderTreeNode = (node: AccountTreeNode, level = 0) => {
     if (!node || !node.account) return null;
     const acc = node.account;
     const hasChildren = node.children && node.children.length > 0;
@@ -172,7 +177,7 @@ export const ChartOfAccounts: React.FC = () => {
 
         {hasChildren && isExpanded && (
           <div>
-            {node.children.map((child: any) => renderTreeNode(child, level + 1))}
+            {node.children.map((child) => renderTreeNode(child, level + 1))}
           </div>
         )}
       </div>

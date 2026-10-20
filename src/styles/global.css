@@ -1066,6 +1066,29 @@
   color: #2563eb;
 }
 
+.sidebar-submenu {
+  animation: fadeInSubmenu 0.15s ease;
+}
+
+.sidebar .submenu-item {
+  font-size: 12.5px;
+  color: #556477;
+  padding: 7px 10px;
+  margin-bottom: 2px;
+}
+
+.sidebar .submenu-item:hover {
+  background: #f0f4fe;
+  color: #1a2b4a;
+}
+
+.sidebar .submenu-item.active {
+  background: #eef2ff;
+  color: #1e3a8a;
+  font-weight: 600;
+  border-left: 3px solid #2563eb;
+}
+
 .menu-divider {
   height: 1px;
   background: #e9edf4;
@@ -1918,9 +1941,57 @@ textarea.form-control {
   margin: 6px 0 8px;
 }
 
-.right-sidebar-footer {
+.rs-mode-section {
   margin-top: auto;
-  padding-top: 12px;
+  padding-top: 4px;
+}
+
+.rs-mode-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin: 3px 0;
+  position: relative;
+}
+
+.rs-mode-btn:hover {
+  background: #f0f4fe;
+  color: #2563eb;
+  border-color: #dbeafe;
+  transform: translateY(-1px);
+}
+
+.rs-mode-btn.ai-mode-btn:hover {
+  background: #faf5ff;
+  color: #7c3aed;
+  border-color: #e9d5ff;
+}
+
+.rs-mode-btn.ai-mode-active {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(37, 99, 235, 0.14));
+  color: #7c3aed;
+  border-color: #c4b5fd;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.18);
+}
+
+.rs-mode-btn.hybrid-mode-active {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.12), rgba(37, 99, 235, 0.14));
+  color: #0284c7;
+  border-color: #7dd3fc;
+  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.18);
+}
+
+.right-sidebar-footer {
+  padding-top: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -2864,8 +2935,24 @@ textarea.form-control {
     min-width: 70px;
     text-align: center;
   }
+
+  .modal-window {
+    width: 95vw !important;
+    max-height: 90vh !important;
+    padding: 16px !important;
+  }
 }
 
+/* Global table responsive wrapper utility */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 
-
-
+@media (max-width: 640px) {
+  .btn-responsive {
+    width: 100%;
+    justify-content: center;
+  }
+}

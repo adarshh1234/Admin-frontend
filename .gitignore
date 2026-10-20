@@ -23,3 +23,12 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+
+# Environment files
+.env.*
+!.env.example
+
+# Local backups and Git repositories
+backups/
+repos/

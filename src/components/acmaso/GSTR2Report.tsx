@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { acmasoApi } from '../../services/acmaso.service';
-import type { Gstr2ReportData } from '../../types/acmaso';
+import type { Gstr2ReportData, Gstr2Row } from '../../types/acmaso';
 import { useToast } from '../../hooks/useToast';
 
 export const GSTR2Report: React.FC = () => {
@@ -18,7 +18,7 @@ export const GSTR2Report: React.FC = () => {
         setData(res.data);
       } else if (res && (res as any).totals) {
         // Direct response fallback
-        setData(res as any);
+        setData(res as unknown as Gstr2ReportData);
       }
     } catch {
       showToast('Failed to load GSTR-2 data', 'error');
@@ -35,49 +35,44 @@ export const GSTR2Report: React.FC = () => {
   const summary = {
     taxable_amount: Number(
       data?.summary?.taxable_amount ??
-      (data as any)?.totals?.totalTaxableValue ??
-      (data as any)?.totals?.taxable_amount ??
+      data?.totals?.totalTaxableAmount ??
+      data?.totals?.total_amount ??
       0
     ),
     igst: Number(
       data?.summary?.igst ??
-      (data as any)?.totals?.totalIgst ??
-      (data as any)?.totals?.igst ??
+      data?.totals?.totalIgst ??
       0
     ),
     cgst: Number(
       data?.summary?.cgst ??
-      (data as any)?.totals?.totalCgst ??
-      (data as any)?.totals?.cgst ??
+      data?.totals?.totalCgst ??
       0
     ),
     sgst: Number(
       data?.summary?.sgst ??
-      (data as any)?.totals?.totalSgst ??
-      (data as any)?.totals?.sgst ??
+      data?.totals?.totalSgst ??
       0
     ),
     cess: Number(
       data?.summary?.cess ??
-      (data as any)?.totals?.totalCess ??
+      data?.totals?.totalCess ??
       0
     ),
     total_itc_available: Number(
       data?.summary?.total_itc_available ??
-      (data as any)?.totals?.totalItcAvailable ??
-      (data as any)?.totals?.total_itc_available ??
-      (data as any)?.totals?.totalTax ??
+      data?.totals?.totalItcAvailable ??
       0
     ),
     total_amount: Number(
       data?.summary?.total_amount ??
-      (data as any)?.totals?.totalInvoiceValue ??
-      (data as any)?.totals?.total_amount ??
+      data?.totals?.totalInvoiceValue ??
+      data?.totals?.total_amount ??
       0
     ),
   };
 
-  const inwardSupplies = Array.isArray(data?.inward_supplies)
+  const inwardSupplies: Gstr2Row[] = Array.isArray(data?.inward_supplies)
     ? data.inward_supplies
     : Array.isArray(data?.rows)
     ? data.rows
@@ -85,7 +80,7 @@ export const GSTR2Report: React.FC = () => {
 
   const exportCsv = () => {
     let csv = "Invoice Number,Date,Supplier,GSTIN,Place of Supply,Taxable Amount,IGST,CGST,SGST,Cess,Eligible ITC,Total Amount\n";
-    inwardSupplies.forEach((r: any) => {
+    inwardSupplies.forEach((r: Gstr2Row) => {
       const invNo = r.invoice_number || r.invoiceNumber || '';
       const date = r.date || r.invoiceDate || '';
       const supp = r.supplier_name || r.supplierName || r.partyName || '';
@@ -96,7 +91,7 @@ export const GSTR2Report: React.FC = () => {
       const cgst = Number(r.cgst ?? r.cgstAmount ?? 0);
       const sgst = Number(r.sgst ?? r.sgstAmount ?? 0);
       const cess = Number(r.cess ?? 0);
-      const itc = r.itc_eligible ?? r.itcEligible ?? true ? 'Yes' : 'No';
+      const itc = (r.itc_eligible ?? r.itcEligible ?? true) ? 'Yes' : 'No';
       const total = Number(r.total_amount ?? r.invoiceValue ?? 0);
 
       csv += `"${invNo}","${date}","${supp}","${gstin}","${pos}","${taxable}","${igst}","${cgst}","${sgst}","${cess}","${itc}","${total}"\n`;
@@ -209,7 +204,7 @@ export const GSTR2Report: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                inwardSupplies.map((row: any, idx: number) => {
+                inwardSupplies.map((row: Gstr2Row, idx: number) => {
                   const invNo = row.invoice_number || row.invoiceNumber || '—';
                   const date = row.date || row.invoiceDate || '—';
                   const suppName = row.supplier_name || row.supplierName || row.partyName || '—';
@@ -223,7 +218,7 @@ export const GSTR2Report: React.FC = () => {
                   const total = Number(row.total_amount ?? row.invoiceValue ?? 0);
 
                   return (
-                    <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <tr key={row.invoice_number || row.invoiceNumber || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                       <td style={{ padding: '12px 16px', fontWeight: 600, color: '#0f172a' }}>{invNo}</td>
                       <td style={{ padding: '12px 16px', color: '#64748b' }}>{date}</td>
                       <td style={{ padding: '12px 16px' }}>{suppName}</td>

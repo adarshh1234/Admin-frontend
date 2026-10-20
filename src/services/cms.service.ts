@@ -1,23 +1,28 @@
 import type { LandingPageCmsData } from '../types/cms';
+import { API_BASE_URL } from './apiConfig';
+import { authService } from './auth.service';
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000')
-  .replace(/\/api\/?$/, '')
-  .replace(/\/+$/, '');
+const API_BASE = API_BASE_URL;
 
-const ADMIN_HEADERS = {
-  'Content-Type': 'application/json',
-  'Authorization': 'Bearer admin-token',
-  'x-admin-key': 'admin',
-  'x-admin-role': 'Admin',
-};
+function getAdminHeaders(): Record<string, string> {
+  const token = authService.getToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  } else {
+    headers['Authorization'] = 'Bearer admin-token';
+    headers['x-admin-key'] = 'admin';
+    headers['x-admin-role'] = 'Admin';
+  }
+  return headers;
+}
 
 export const cmsService = {
   async getCmsData(mode: 'draft' | 'published' = 'draft'): Promise<LandingPageCmsData> {
     const res = await fetch(`${API_BASE}/api/cms/landing-page?mode=${mode}`, {
-      headers: {
-        'Authorization': 'Bearer admin-token',
-        'x-admin-key': 'admin',
-      },
+      headers: getAdminHeaders(),
     });
     if (!res.ok) {
       throw new Error(`Failed to fetch CMS content (${res.status} ${res.statusText})`);
@@ -29,7 +34,7 @@ export const cmsService = {
   async saveDraft(data: LandingPageCmsData): Promise<LandingPageCmsData> {
     const res = await fetch(`${API_BASE}/api/cms/landing-page`, {
       method: 'PUT',
-      headers: ADMIN_HEADERS,
+      headers: getAdminHeaders(),
       body: JSON.stringify(data),
     });
     if (!res.ok) {
@@ -43,7 +48,7 @@ export const cmsService = {
   async publishContent(): Promise<LandingPageCmsData> {
     const res = await fetch(`${API_BASE}/api/cms/landing-page/publish`, {
       method: 'POST',
-      headers: ADMIN_HEADERS,
+      headers: getAdminHeaders(),
     });
     if (!res.ok) {
       const errJson = await res.json().catch(() => ({}));
@@ -57,12 +62,18 @@ export const cmsService = {
     const formData = new FormData();
     formData.append('file', file);
 
+    const headers: Record<string, string> = {};
+    const token = authService.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    } else {
+      headers['Authorization'] = 'Bearer admin-token';
+      headers['x-admin-key'] = 'admin';
+    }
+
     const res = await fetch(`${API_BASE}/api/cms/upload`, {
       method: 'POST',
-      headers: {
-        'Authorization': 'Bearer admin-token',
-        'x-admin-key': 'admin',
-      },
+      headers,
       body: formData,
     });
     if (!res.ok) {
@@ -74,7 +85,7 @@ export const cmsService = {
   async resetToDefaults(): Promise<LandingPageCmsData> {
     const res = await fetch(`${API_BASE}/api/cms/reset`, {
       method: 'POST',
-      headers: ADMIN_HEADERS,
+      headers: getAdminHeaders(),
     });
     if (!res.ok) {
       throw new Error(`Reset failed (${res.status})`);
@@ -83,4 +94,3 @@ export const cmsService = {
     return json.data;
   },
 };
-

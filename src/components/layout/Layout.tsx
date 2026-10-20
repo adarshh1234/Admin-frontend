@@ -95,6 +95,7 @@ export function Layout({
       </div>
       <RightSidebar
         onOpenPanel={openPanel}
+        onNavigateModule={handleSelectModule}
         activePanelTab={panelState.activeTab}
         isPanelOpen={panelState.isOpen}
       />

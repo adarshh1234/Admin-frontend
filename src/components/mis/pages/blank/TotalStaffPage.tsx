@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { mockTotalStaff } from '../../data/userData';
+import { useDashboard } from '../../context/DashboardContext';
 
 export default function TotalStaffPage() {
   const navigate = useNavigate();
+  const { totalStaffDetails } = useDashboard();
 
   return (
     <>
@@ -24,7 +25,7 @@ export default function TotalStaffPage() {
           <div className="mis-section-title">
             <i className="fas fa-id-badge" style={{ color: 'var(--admin-primary)' }} /> Total Staff Roster
           </div>
-          <div className="mis-section-desc">Active employees, designations, and departmental breakdown.</div>
+          <div className="mis-section-desc">Active employees, designations, and departmental breakdown from live platform user records.</div>
           <div className="mis-table-responsive">
             <table className="mis-table">
               <thead>
@@ -35,7 +36,7 @@ export default function TotalStaffPage() {
                 </tr>
               </thead>
               <tbody>
-                {mockTotalStaff.map((row) => (
+                {totalStaffDetails.map((row) => (
                   <tr key={row.sNo}>
                     <td>{row.sNo}</td>
                     <td>{row.date}</td>

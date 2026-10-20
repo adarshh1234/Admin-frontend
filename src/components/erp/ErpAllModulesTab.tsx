@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { ALL_MODULES } from '../../data/modulesData';
+import { useAuth } from '../../context/AuthContext';
+import { isModuleAccessible } from '../../utils/permission.utils';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
 
@@ -10,10 +12,12 @@ interface ErpAllModulesTabProps {
 const CATEGORIES = ['all', 'core', 'sales', 'people', 'tech', 'legal'] as const;
 
 export function ErpAllModulesTab({ onNavigateModule }: ErpAllModulesTabProps) {
+  const { user, isSuperAdmin, isAdmin } = useAuth();
   const [moduleSearch, setModuleSearch] = useState('');
   const [moduleFilter, setModuleFilter] = useState<string>('all');
 
   const filteredModules = ALL_MODULES.filter((m) => {
+    if (!isModuleAccessible(m.id, user, isSuperAdmin, isAdmin)) return false;
     const matchesCategory = moduleFilter === 'all' || m.category === moduleFilter;
     const matchesSearch =
       moduleSearch.trim() === '' ||

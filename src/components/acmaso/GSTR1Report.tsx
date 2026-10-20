@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { acmasoApi } from '../../services/acmaso.service';
-import type { Gstr1ReportData } from '../../types/acmaso';
+import type { Gstr1ReportData, Gstr1Row } from '../../types/acmaso';
 import { useToast } from '../../hooks/useToast';
 
 export const GSTR1Report: React.FC = () => {
@@ -19,7 +19,7 @@ export const GSTR1Report: React.FC = () => {
         setData(res.data);
       } else if (res && (res as any).totals) {
         // Direct response fallback
-        setData(res as any);
+        setData(res as unknown as Gstr1ReportData);
       }
     } catch {
       showToast('Failed to load GSTR-1 data', 'error');
@@ -36,48 +36,45 @@ export const GSTR1Report: React.FC = () => {
   const summary = {
     taxable_amount: Number(
       data?.summary?.taxable_amount ??
-      (data as any)?.totals?.totalTaxableValue ??
-      (data as any)?.totals?.taxable_amount ??
+      data?.totals?.totalTaxableAmount ??
+      data?.totals?.total_amount ??
       0
     ),
     igst: Number(
       data?.summary?.igst ??
-      (data as any)?.totals?.totalIgst ??
-      (data as any)?.totals?.igst ??
+      data?.totals?.totalIgst ??
       0
     ),
     cgst: Number(
       data?.summary?.cgst ??
-      (data as any)?.totals?.totalCgst ??
-      (data as any)?.totals?.cgst ??
+      data?.totals?.totalCgst ??
       0
     ),
     sgst: Number(
       data?.summary?.sgst ??
-      (data as any)?.totals?.totalSgst ??
-      (data as any)?.totals?.sgst ??
+      data?.totals?.totalSgst ??
       0
     ),
     cess: Number(
       data?.summary?.cess ??
-      (data as any)?.totals?.totalCess ??
+      data?.totals?.totalCess ??
       0
     ),
     total_amount: Number(
       data?.summary?.total_amount ??
-      (data as any)?.totals?.totalInvoiceValue ??
-      (data as any)?.totals?.total_amount ??
+      data?.totals?.totalInvoiceValue ??
+      data?.totals?.total_amount ??
       0
     ),
   };
 
   // Safe Section Rows
-  const allRows = Array.isArray(data?.rows) ? data.rows : [];
-  const b2bRows = Array.isArray(data?.b2b) ? data.b2b : allRows.filter((r: any) => (r.type === 'B2B' || (!r.type && r.gstin)));
-  const b2clRows = Array.isArray(data?.b2cl) ? data.b2cl : allRows.filter((r: any) => r.type === 'B2CL');
-  const b2csRows = Array.isArray(data?.b2cs) ? data.b2cs : allRows.filter((r: any) => r.type === 'B2CS' || (!r.type && !r.gstin));
+  const allRows: Gstr1Row[] = Array.isArray(data?.rows) ? data.rows : [];
+  const b2bRows: Gstr1Row[] = Array.isArray(data?.b2b) ? data.b2b : allRows.filter((r: Gstr1Row) => (r.type === 'B2B' || (!r.type && r.gstin)));
+  const b2clRows: Gstr1Row[] = Array.isArray(data?.b2cl) ? data.b2cl : allRows.filter((r: Gstr1Row) => r.type === 'B2CL');
+  const b2csRows: Gstr1Row[] = Array.isArray(data?.b2cs) ? data.b2cs : allRows.filter((r: Gstr1Row) => r.type === 'B2CS' || (!r.type && !r.gstin));
 
-  const currentTabRows = activeTab === 'b2b' ? b2bRows : activeTab === 'b2cl' ? b2clRows : b2csRows;
+  const currentTabRows: Gstr1Row[] = activeTab === 'b2b' ? b2bRows : activeTab === 'b2cl' ? b2clRows : b2csRows;
 
   const exportJson = () => {
     const exportPayload = {
@@ -99,7 +96,7 @@ export const GSTR1Report: React.FC = () => {
 
   const exportCsv = () => {
     let csv = "Invoice Number,Date,Customer,GSTIN,Place of Supply,Taxable Amount,IGST,CGST,SGST,Cess,Total Amount\n";
-    currentTabRows.forEach((r: any) => {
+    currentTabRows.forEach((r: Gstr1Row) => {
       const invNo = r.invoice_number || r.invoiceNumber || '';
       const date = r.date || r.invoiceDate || '';
       const cust = r.customer_name || r.partyName || '';
@@ -246,7 +243,7 @@ export const GSTR1Report: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                currentTabRows.map((row: any, idx: number) => {
+                currentTabRows.map((row: Gstr1Row, idx: number) => {
                   const invNo = row.invoice_number || row.invoiceNumber || '—';
                   const date = row.date || row.invoiceDate || '—';
                   const custName = row.customer_name || row.partyName || '—';
@@ -259,7 +256,7 @@ export const GSTR1Report: React.FC = () => {
                   const total = Number(row.total_amount ?? row.invoiceValue ?? 0);
 
                   return (
-                    <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                    <tr key={row.invoice_number || row.invoiceNumber || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                       <td style={{ padding: '12px 16px', fontWeight: 600, color: '#0f172a' }}>{invNo}</td>
                       <td style={{ padding: '12px 16px', color: '#64748b' }}>{date}</td>
                       <td style={{ padding: '12px 16px' }}>{custName}</td>

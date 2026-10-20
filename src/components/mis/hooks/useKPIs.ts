@@ -2,9 +2,41 @@ import { useMemo } from 'react';
 import { useDashboard } from '../context/DashboardContext';
 
 export function useKPIs() {
-  const { dailyRows, monthlyRows, staffData, crmDeals, duesData, annualRows, recurringExpenses, marketingData, expansionData } = useDashboard();
+  const {
+    dailyRows,
+    monthlyRows,
+    staffData,
+    openPositionsData,
+    crmDeals,
+    duesData,
+    annualRows,
+    recurringExpenses,
+    marketingData,
+    expansionData,
+    kpis,
+  } = useDashboard();
 
   return useMemo(() => {
+    if (kpis) {
+      return {
+        dau: kpis.dau,
+        mau: kpis.mau,
+        totalStaff: kpis.totalStaff,
+        openPositions: kpis.openPositions,
+        pipeline: Math.round(kpis.pipeline),
+        overdue: kpis.overdue,
+        margin: String(kpis.margin),
+        recurringTotal: kpis.recurringTotal,
+        overallMktRoi: String(kpis.overallMktRoi),
+        highPotential: kpis.highPotential,
+        cashFlow: kpis.cashFlow,
+        rois: String(kpis.rois),
+        assets: kpis.assets,
+        liquidity: kpis.liquidity,
+        revenue: kpis.revenue,
+      };
+    }
+
     const lastDaily = dailyRows[dailyRows.length - 1];
     const dau = lastDaily ? lastDaily.dau : 0;
 
@@ -12,7 +44,7 @@ export function useKPIs() {
     const mau = lastMonthly ? lastMonthly.mau : 0;
 
     const totalStaff = staffData.length;
-    const openPositions = dailyRows.reduce((acc, r) => acc + r.postings, 0);
+    const openPositions = openPositionsData?.length || dailyRows.reduce((acc, r) => acc + r.postings, 0);
 
     const openDeals = crmDeals.filter((d) => d.stage !== 'Closed Won' && d.stage !== 'Closed Lost');
     const pipeline = openDeals.reduce((acc, d) => acc + d.value * d.probability, 0);
@@ -30,14 +62,40 @@ export function useKPIs() {
 
     const highPotential = expansionData.filter((e) => e.currentRevenue + e.potentialRevenue > 1500000).length;
 
+    const monthlyRev = lastMonthly ? (lastMonthly.subRev + lastMonthly.adRev) : 400000;
+    const monthlyNetCashFlow = monthlyRev - recurringTotal;
+    const totalAssets = 2112000;
+    const totalLiquidity = 1669000;
+    const overallReturn = 22.5;
+
     return {
-      dau, mau, totalStaff, openPositions,
+      dau,
+      mau,
+      totalStaff,
+      openPositions,
       pipeline: Math.round(pipeline),
       overdue,
       margin: margin.toFixed(1),
       recurringTotal,
       overallMktRoi: overallMktRoi.toFixed(1),
       highPotential,
+      cashFlow: monthlyNetCashFlow,
+      rois: overallReturn.toFixed(1),
+      assets: totalAssets,
+      liquidity: totalLiquidity,
+      revenue: monthlyRev,
     };
-  }, [dailyRows, monthlyRows, staffData, crmDeals, duesData, annualRows, recurringExpenses, marketingData, expansionData]);
+  }, [
+    kpis,
+    dailyRows,
+    monthlyRows,
+    staffData,
+    openPositionsData,
+    crmDeals,
+    duesData,
+    annualRows,
+    recurringExpenses,
+    marketingData,
+    expansionData,
+  ]);
 }

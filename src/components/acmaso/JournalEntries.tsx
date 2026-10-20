@@ -52,7 +52,7 @@ export const JournalEntries: React.FC = () => {
     setAccountRows([...accountRows, { account: '', debit: 0, credit: 0, party: '' }]);
   }
 
-  function handleRowChange(index: number, field: string, value: any) {
+  function handleRowChange(index: number, field: 'account' | 'debit' | 'credit' | 'party', value: string | number) {
     const updated = [...accountRows];
     updated[index] = { ...updated[index], [field]: value };
     // If setting debit, clear credit on that line, and vice versa

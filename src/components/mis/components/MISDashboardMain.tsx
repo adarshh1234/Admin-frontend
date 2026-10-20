@@ -3,7 +3,7 @@ import '../chartSetup';
 import MISHeader from './Header';
 import MISKPICards from './KPICards';
 import MISTabs from './Tabs';
-import MISLoader from './ui/Loader';
+import { Loader } from '../../common/Loader';
 
 const DailyPage = lazy(() => import('../pages/DailyPage'));
 const WeeklyPage = lazy(() => import('../pages/WeeklyPage'));
@@ -50,7 +50,7 @@ export default function MISDashboardMain() {
         <MISKPICards />
         <MISTabs active={activeTab} onChange={setActiveTab} />
         <div className="mis-panel">
-          <Suspense fallback={<MISLoader label="Loading section..." />}>
+          <Suspense fallback={<Loader label="Loading section..." />}>
             <ActivePanel />
           </Suspense>
         </div>

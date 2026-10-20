@@ -5,9 +5,32 @@ import { Input } from '../common/Input';
 import { Loader } from '../common/Loader';
 import { useToast } from '../../hooks/useToast';
 
+interface PnlRow {
+  account: string;
+  amount: number;
+}
+
+interface PnlSection {
+  rows: PnlRow[];
+  total: number;
+}
+
+interface PnlReportData {
+  income: PnlSection;
+  directExpenses: PnlSection;
+  indirectExpenses: PnlSection;
+  summary: {
+    totalIncome: number;
+    totalExpense: number;
+    grossProfit: number;
+    netProfit: number;
+    isProfitable: boolean;
+  };
+}
+
 export const ProfitAndLoss: React.FC = () => {
   const { showToast } = useToast();
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<PnlReportData | null>(null);
   const [loading, setLoading] = useState(true);
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
@@ -20,8 +43,8 @@ export const ProfitAndLoss: React.FC = () => {
     setLoading(true);
     try {
       const res = await acmasoService.getProfitAndLoss({ fromDate, toDate });
-      setData(res);
-    } catch (err: any) {
+      setData(res as PnlReportData);
+    } catch {
       showToast('Failed to calculate Profit & Loss report.', 'error');
     } finally {
       setLoading(false);
@@ -36,16 +59,16 @@ export const ProfitAndLoss: React.FC = () => {
       [''],
       ['CATEGORY / ACCOUNT', 'AMOUNT (INR)'],
       ['INCOME', ''],
-      ...(data.income.rows || []).map((r: any) => [`  ${r.account}`, r.amount]),
+      ...(data.income.rows || []).map((r: PnlRow) => [`  ${r.account}`, r.amount]),
       ['TOTAL OPERATING INCOME', data.income.total],
       [''],
       ['DIRECT EXPENSES', ''],
-      ...(data.directExpenses.rows || []).map((r: any) => [`  ${r.account}`, r.amount]),
+      ...(data.directExpenses.rows || []).map((r: PnlRow) => [`  ${r.account}`, r.amount]),
       ['TOTAL DIRECT EXPENSES', data.directExpenses.total],
       ['GROSS PROFIT', data.summary.grossProfit],
       [''],
       ['INDIRECT OPERATING EXPENSES', ''],
-      ...(data.indirectExpenses.rows || []).map((r: any) => [`  ${r.account}`, r.amount]),
+      ...(data.indirectExpenses.rows || []).map((r: PnlRow) => [`  ${r.account}`, r.amount]),
       ['TOTAL INDIRECT EXPENSES', data.indirectExpenses.total],
       [''],
       ['NET PROFIT / (LOSS)', data.summary.netProfit],
@@ -144,8 +167,8 @@ export const ProfitAndLoss: React.FC = () => {
               <td style={{ padding: '10px 18px' }}><i className="fas fa-arrow-trend-up" style={{ marginRight: 8 }} /> Operating Income</td>
               <td style={{ padding: '10px 18px', textAlign: 'right' }}>₹{Number(income.total || 0).toLocaleString('en-IN')}</td>
             </tr>
-            {(income.rows || []).map((row: any, idx: number) => (
-              <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+            {(income.rows || []).map((row: PnlRow, idx: number) => (
+              <tr key={row.account || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                 <td style={{ padding: '10px 18px 10px 36px', color: '#1e293b' }}>{row.account}</td>
                 <td style={{ padding: '10px 18px', textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>
                   ₹{Number(row.amount || 0).toLocaleString('en-IN')}
@@ -158,8 +181,8 @@ export const ProfitAndLoss: React.FC = () => {
               <td style={{ padding: '10px 18px' }}><i className="fas fa-box" style={{ marginRight: 8 }} /> Cost of Goods &amp; Direct Expenses</td>
               <td style={{ padding: '10px 18px', textAlign: 'right' }}>₹{Number(directExpenses.total || 0).toLocaleString('en-IN')}</td>
             </tr>
-            {(directExpenses.rows || []).map((row: any, idx: number) => (
-              <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+            {(directExpenses.rows || []).map((row: PnlRow, idx: number) => (
+              <tr key={row.account || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                 <td style={{ padding: '10px 18px 10px 36px', color: '#1e293b' }}>{row.account}</td>
                 <td style={{ padding: '10px 18px', textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>
                   ₹{Number(row.amount || 0).toLocaleString('en-IN')}
@@ -180,8 +203,8 @@ export const ProfitAndLoss: React.FC = () => {
               <td style={{ padding: '10px 18px' }}><i className="fas fa-building" style={{ marginRight: 8 }} /> Indirect Operating Expenses</td>
               <td style={{ padding: '10px 18px', textAlign: 'right' }}>₹{Number(indirectExpenses.total || 0).toLocaleString('en-IN')}</td>
             </tr>
-            {(indirectExpenses.rows || []).map((row: any, idx: number) => (
-              <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+            {(indirectExpenses.rows || []).map((row: PnlRow, idx: number) => (
+              <tr key={row.account || idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
                 <td style={{ padding: '10px 18px 10px 36px', color: '#1e293b' }}>{row.account}</td>
                 <td style={{ padding: '10px 18px', textAlign: 'right', fontWeight: 600, color: '#0f172a' }}>
                   ₹{Number(row.amount || 0).toLocaleString('en-IN')}

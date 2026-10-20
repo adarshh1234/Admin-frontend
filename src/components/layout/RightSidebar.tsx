@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import type { PanelTabType } from '../../types/panel';
 import { Button } from '../common/Button';
+import { AiModeModal } from './modals/AiModeModal';
+import { HybridModeModal } from './modals/HybridModeModal';
 
 interface RightSidebarProps {
   onOpenPanel: (tab: PanelTabType, agent?: string) => void;
+  onNavigateModule?: (id: number) => void;
   activePanelTab?: PanelTabType;
   isPanelOpen?: boolean;
 }
@@ -25,149 +28,206 @@ const CHAT_SUBMENU = [
   { id: 'chat-task' as PanelTabType, name: 'Task', icon: 'fa-tasks' },
 ];
 
-export function RightSidebar({ onOpenPanel, activePanelTab, isPanelOpen }: RightSidebarProps) {
+export function RightSidebar({ onOpenPanel, onNavigateModule, activePanelTab, isPanelOpen }: RightSidebarProps) {
   const [aiDropdownOpen, setAiDropdownOpen] = useState<boolean>(false);
   const [chatDropdownOpen, setChatDropdownOpen] = useState<boolean>(false);
 
+  // Modals state for bottom Mode options
+  const [isAiModeModalOpen, setIsAiModeModalOpen] = useState<boolean>(false);
+  const [isHybridModeModalOpen, setIsHybridModeModalOpen] = useState<boolean>(false);
+  const [currentSystemMode, setCurrentSystemMode] = useState<'hybrid' | 'manual' | 'ai'>('hybrid');
+
   return (
-    <aside className="right-sidebar" id="rightSidebar" aria-label="Right Sidebar Navigation">
-      {/* 1. AI DROPDOWN SECTION */}
-      <div className="rs-section">
+    <>
+      <aside className="right-sidebar" id="rightSidebar" aria-label="Right Sidebar Navigation">
+        {/* 1. AI DROPDOWN SECTION */}
+        <div className="rs-section">
+          <Button
+            type="button"
+            className={`rs-header-btn ${aiDropdownOpen ? 'open' : ''}`}
+            onClick={() => setAiDropdownOpen((prev) => !prev)}
+            title="Toggle AI Submenu"
+          >
+            <div className="ai-header-badge">
+              <i className="fas fa-brain" />
+            </div>
+            <i className={`fas fa-chevron-${aiDropdownOpen ? 'up' : 'down'} rs-chevron`} />
+          </Button>
+
+          {aiDropdownOpen && (
+            <div className="rs-submenu ai-submenu">
+              {AI_SUBMENU.map((item) => (
+                <Button
+                  key={item.name}
+                  type="button"
+                  className={`rs-item-btn${
+                    isPanelOpen && activePanelTab === 'ai-agent' ? ' active' : ''
+                  }`}
+                  title={item.name}
+                  onClick={() => {
+                    if (item.name === 'AI Customer Care' || item.name === 'AI Support') {
+                      onNavigateModule?.(21);
+                    } else {
+                      onOpenPanel('ai-agent', item.name);
+                    }
+                  }}
+                >
+                  <i className={`fas ${item.icon}`} />
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="right-sidebar-divider" />
+
+        {/* 2. NOTIFICATIONS */}
         <Button
           type="button"
-          className={`rs-header-btn ${aiDropdownOpen ? 'open' : ''}`}
-          onClick={() => setAiDropdownOpen((prev) => !prev)}
-          title="Toggle AI Submenu"
-        >
-          <div className="ai-header-badge">
-            <i className="fas fa-brain" />
-          </div>
-          <i className={`fas fa-chevron-${aiDropdownOpen ? 'up' : 'down'} rs-chevron`} />
-        </Button>
-
-        {aiDropdownOpen && (
-          <div className="rs-submenu ai-submenu">
-            {AI_SUBMENU.map((item) => (
-              <Button
-                key={item.name}
-                type="button"
-                className={`rs-item-btn${
-                  isPanelOpen && activePanelTab === 'ai-agent' ? ' active' : ''
-                }`}
-                title={item.name}
-                onClick={() => onOpenPanel('ai-agent', item.name)}
-              >
-                <i className={`fas ${item.icon}`} />
-              </Button>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <div className="right-sidebar-divider" />
-
-      {/* 2. NOTIFICATIONS */}
-      <Button
-        type="button"
-        className={`rs-item-btn notify-btn${
-          isPanelOpen && activePanelTab === 'notifications' ? ' active' : ''
-        }`}
-        title="Notifications"
-        onClick={() => onOpenPanel('notifications')}
-      >
-        <i className="fas fa-bell" />
-        <span className="rs-badge-dot">4</span>
-      </Button>
-
-      {/* 3. CHAT WITH EXPANDABLE SUBMENU */}
-      <div className="rs-section">
-        <Button
-          type="button"
-          className={`rs-item-btn chat-main-btn${
-            isPanelOpen && activePanelTab?.startsWith('chat-') ? ' active' : ''
+          className={`rs-item-btn notify-btn${
+            isPanelOpen && activePanelTab === 'notifications' ? ' active' : ''
           }`}
-          title="Chat & Channels"
-          onClick={() => {
-            setChatDropdownOpen((prev) => !prev);
-            onOpenPanel('chat-support');
-          }}
+          title="Notifications"
+          onClick={() => onOpenPanel('notifications')}
         >
-          <i className="fas fa-comment-dots" />
+          <i className="fas fa-bell" />
+          <span className="rs-badge-dot">4</span>
         </Button>
 
-        {chatDropdownOpen && (
-          <div className="rs-submenu chat-submenu">
-            {CHAT_SUBMENU.map((chat) => (
-              <Button
-                key={chat.id}
-                type="button"
-                className={`rs-item-btn sub-btn${
-                  isPanelOpen && activePanelTab === chat.id ? ' active' : ''
-                }`}
-                title={`Chat: ${chat.name}`}
-                onClick={() => onOpenPanel(chat.id)}
-              >
-                <i className={`fas ${chat.icon}`} />
-              </Button>
-            ))}
-          </div>
-        )}
-      </div>
+        {/* 3. CHAT WITH EXPANDABLE SUBMENU */}
+        <div className="rs-section">
+          <Button
+            type="button"
+            className={`rs-item-btn chat-main-btn${
+              isPanelOpen && activePanelTab?.startsWith('chat-') ? ' active' : ''
+            }`}
+            title="Chat & Channels"
+            onClick={() => {
+              setChatDropdownOpen((prev) => !prev);
+              onOpenPanel('chat-support');
+            }}
+          >
+            <i className="fas fa-comment-dots" />
+          </Button>
 
-      {/* 4. NEWS */}
-      <Button
-        type="button"
-        className={`rs-item-btn${isPanelOpen && activePanelTab === 'news' ? ' active' : ''}`}
-        title="Company News"
-        onClick={() => onOpenPanel('news')}
-      >
-        <i className="fas fa-newspaper" />
-      </Button>
+          {chatDropdownOpen && (
+            <div className="rs-submenu chat-submenu">
+              {CHAT_SUBMENU.map((chat) => (
+                <Button
+                  key={chat.id}
+                  type="button"
+                  className={`rs-item-btn sub-btn${
+                    isPanelOpen && activePanelTab === chat.id ? ' active' : ''
+                  }`}
+                  title={`Chat: ${chat.name}`}
+                  onClick={() => onOpenPanel(chat.id)}
+                >
+                  <i className={`fas ${chat.icon}`} />
+                </Button>
+              ))}
+            </div>
+          )}
+        </div>
 
-      {/* 5. FAVORITES */}
-      <Button
-        type="button"
-        className={`rs-item-btn${isPanelOpen && activePanelTab === 'favorites' ? ' active' : ''}`}
-        title="Favorites"
-        onClick={() => onOpenPanel('favorites')}
-      >
-        <i className="fas fa-star" />
-      </Button>
+        {/* 4. NEWS */}
+        <Button
+          type="button"
+          className={`rs-item-btn${isPanelOpen && activePanelTab === 'news' ? ' active' : ''}`}
+          title="Company News"
+          onClick={() => onOpenPanel('news')}
+        >
+          <i className="fas fa-newspaper" />
+        </Button>
 
-      {/* 6. CALENDAR */}
-      <Button
-        type="button"
-        className={`rs-item-btn${isPanelOpen && activePanelTab === 'calendar' ? ' active' : ''}`}
-        title="Calendar"
-        onClick={() => onOpenPanel('calendar')}
-      >
-        <i className="fas fa-calendar-alt" />
-      </Button>
+        {/* 5. FAVORITES */}
+        <Button
+          type="button"
+          className={`rs-item-btn${isPanelOpen && activePanelTab === 'favorites' ? ' active' : ''}`}
+          title="Favorites"
+          onClick={() => onOpenPanel('favorites')}
+        >
+          <i className="fas fa-star" />
+        </Button>
 
-      {/* 7. NOTES */}
-      <Button
-        type="button"
-        className={`rs-item-btn${isPanelOpen && activePanelTab === 'notes' ? ' active' : ''}`}
-        title="Notes"
-        onClick={() => onOpenPanel('notes')}
-      >
-        <i className="fas fa-sticky-note" />
-      </Button>
+        {/* 6. CALENDAR */}
+        <Button
+          type="button"
+          className={`rs-item-btn${isPanelOpen && activePanelTab === 'calendar' ? ' active' : ''}`}
+          title="Calendar"
+          onClick={() => onOpenPanel('calendar')}
+        >
+          <i className="fas fa-calendar-alt" />
+        </Button>
 
-      {/* 8. TASKS / TO-DO */}
-      <Button
-        type="button"
-        className={`rs-item-btn${isPanelOpen && activePanelTab === 'tasks' ? ' active' : ''}`}
-        title="Tasks / To-Do"
-        onClick={() => onOpenPanel('tasks')}
-      >
-        <i className="fas fa-check-square" />
-      </Button>
+        {/* 7. NOTES */}
+        <Button
+          type="button"
+          className={`rs-item-btn${isPanelOpen && activePanelTab === 'notes' ? ' active' : ''}`}
+          title="Notes"
+          onClick={() => onOpenPanel('notes')}
+        >
+          <i className="fas fa-sticky-note" />
+        </Button>
 
+        {/* 8. TASKS / TO-DO */}
+        <Button
+          type="button"
+          className={`rs-item-btn${isPanelOpen && activePanelTab === 'tasks' ? ' active' : ''}`}
+          title="Tasks / To-Do"
+          onClick={() => onOpenPanel('tasks')}
+        >
+          <i className="fas fa-check-square" />
+        </Button>
 
-      <div className="right-sidebar-footer">
-        <span className="ai-live-dot" title="Suite Online" />
-      </div>
-    </aside>
+        {/* ── BOTTOM MODE SECTION ── */}
+        <div className="right-sidebar-divider" style={{ marginTop: 'auto' }} />
+
+        <div className="rs-section rs-mode-section">
+          {/* 1. AI MODE */}
+          <Button
+            type="button"
+            className={`rs-mode-btn ai-mode-btn${isAiModeModalOpen ? ' ai-mode-active' : ''}`}
+            title="AI Mode"
+            aria-label="AI Mode"
+            onClick={() => setIsAiModeModalOpen(true)}
+          >
+            <i className="fas fa-wand-magic-sparkles" />
+          </Button>
+
+          {/* 2. HYBRID MODE */}
+          <Button
+            type="button"
+            className={`rs-mode-btn hybrid-mode-btn${
+              isHybridModeModalOpen || currentSystemMode === 'hybrid' ? ' hybrid-mode-active' : ''
+            }`}
+            title="Hybrid Mode"
+            aria-label="Hybrid Mode"
+            onClick={() => setIsHybridModeModalOpen(true)}
+          >
+            <i className="fas fa-sliders" />
+          </Button>
+        </div>
+
+        <div className="right-sidebar-divider" />
+
+        <div className="right-sidebar-footer">
+          <span className="ai-live-dot" title="Suite Online" />
+        </div>
+      </aside>
+
+      {/* AI Mode Modal */}
+      <AiModeModal
+        isOpen={isAiModeModalOpen}
+        onClose={() => setIsAiModeModalOpen(false)}
+      />
+
+      {/* Hybrid Mode Modal */}
+      <HybridModeModal
+        isOpen={isHybridModeModalOpen}
+        onClose={() => setIsHybridModeModalOpen(false)}
+        currentMode={currentSystemMode}
+        onSelectMode={setCurrentSystemMode}
+      />
+    </>
   );
 }

@@ -1,8 +1,9 @@
 import { useNavigate } from 'react-router-dom';
-import { mockOpenPositions } from '../../data/userData';
+import { useDashboard } from '../../context/DashboardContext';
 
 export default function OpenPositionsPage() {
   const navigate = useNavigate();
+  const { openPositionsData } = useDashboard();
 
   return (
     <>
@@ -24,7 +25,7 @@ export default function OpenPositionsPage() {
           <div className="mis-section-title">
             <i className="fas fa-briefcase" style={{ color: 'var(--admin-primary)' }} /> Active Open Positions
           </div>
-          <div className="mis-section-desc">Current job requisitions across engineering, design, and operations.</div>
+          <div className="mis-section-desc">Current job requisitions across engineering, design, and operations from live LetGetIn job postings.</div>
           <div className="mis-table-responsive">
             <table className="mis-table">
               <thead>
@@ -34,7 +35,7 @@ export default function OpenPositionsPage() {
                 </tr>
               </thead>
               <tbody>
-                {mockOpenPositions.map((row) => (
+                {openPositionsData.map((row) => (
                   <tr key={row.sNo}>
                     <td>{row.sNo}</td>
                     <td>{row.date}</td>

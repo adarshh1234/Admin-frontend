@@ -1,11 +1,22 @@
+import { useMemo } from 'react';
 import { ALL_MODULES } from '../../data/modulesData';
+import { useAuth } from '../../context/AuthContext';
+import { isModuleAccessible } from '../../utils/permission.utils';
 
 interface ErpDashboardTabProps {
   onNavigateModule: (id: number) => void;
 }
 
 export function ErpDashboardTab({ onNavigateModule }: ErpDashboardTabProps) {
-  const quickModules = ALL_MODULES.slice(0, 8);
+  const { user, isSuperAdmin, isAdmin } = useAuth();
+
+  const allowedModules = useMemo(() => {
+    return ALL_MODULES.filter((m) => isModuleAccessible(m.id, user, isSuperAdmin, isAdmin));
+  }, [user, isSuperAdmin, isAdmin]);
+
+  const quickModules = useMemo(() => {
+    return allowedModules.slice(0, 8);
+  }, [allowedModules]);
 
   return (
     <div>
@@ -15,7 +26,7 @@ export function ErpDashboardTab({ onNavigateModule }: ErpDashboardTabProps) {
           <div className="label">
             <i className="fas fa-cubes" /> Modules
           </div>
-          <div className="value">46</div>
+          <div className="value">{allowedModules.length}</div>
           <div className="sub">
             <span className="up">
               <i className="fas fa-arrow-up" /> +2

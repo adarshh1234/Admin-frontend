@@ -124,6 +124,7 @@ export interface SalesQuote {
   total_taxes_and_charges?: number;
   tax_total?: number;
   taxTotal: number;
+  totalTax?: number;
   grand_total?: number;
   grandTotal: number;
   notes?: string;
@@ -162,11 +163,14 @@ export interface SalesInvoice {
   discountTotal?: number;
   total_taxes_and_charges?: number;
   tax_total?: number;
-  taxTotal: number;
+  taxTotal?: number;
+  totalTax?: number;
   taxAmount?: number;
   tax_amount?: number;
   grand_total?: number;
   grandTotal: number;
+  paid_amount?: number;
+  paidAmount?: number;
   outstanding_amount?: number;
   outstandingAmount: number;
   notes?: string;
@@ -181,8 +185,11 @@ export interface PaymentAllocation {
   referenceType?: 'SalesInvoice' | 'PurchaseInvoice';
   reference_name?: string;
   referenceName?: string;
+  invoiceId?: string;
+  invoiceNumber?: string;
   allocated_amount?: number;
-  amount: number;
+  allocatedAmount?: number;
+  amount?: number;
 }
 
 export interface SalesPayment {
@@ -192,10 +199,12 @@ export interface SalesPayment {
   paymentNumber: string;
   customer?: string;
   party: string;
+  party_type?: 'Customer' | 'Supplier';
+  partyType?: 'Customer' | 'Supplier';
   payment_type?: 'Receive' | 'Pay';
-  paymentType: 'Receive' | 'Pay';
+  paymentType?: 'Receive' | 'Pay';
   payment_method?: string;
-  paymentMethod: string;
+  paymentMethod?: string;
   mode_of_payment?: string;
   modeOfPayment?: string;
   invoiceNumber?: string;
@@ -208,6 +217,7 @@ export interface SalesPayment {
   amount: number;
   reference_number?: string;
   referenceNumber?: string;
+  reference?: string;
   for?: PaymentAllocation[];
   allocations?: PaymentAllocation[];
   status: 'Draft' | 'Submitted' | 'Cancelled';
@@ -428,6 +438,30 @@ export interface DashboardSummary {
   topExpenses: { account: string; amount: number }[];
 }
 
+export interface Gstr1Row {
+  invoice_number?: string;
+  invoiceNumber?: string;
+  date?: string;
+  invoiceDate?: string;
+  customer_name?: string;
+  partyName?: string;
+  gstin?: string;
+  place_of_supply?: string;
+  placeOfSupply?: string;
+  taxable_amount?: number;
+  taxableValue?: number;
+  igst?: number;
+  igstAmount?: number;
+  cgst?: number;
+  cgstAmount?: number;
+  sgst?: number;
+  sgstAmount?: number;
+  cess?: number;
+  total_amount?: number;
+  invoiceValue?: number;
+  type?: string;
+}
+
 export interface Gstr1ReportData {
   period: { from_date?: string; to_date?: string };
   summary: {
@@ -438,47 +472,45 @@ export interface Gstr1ReportData {
     cess: number;
     total_amount: number;
   };
-  rows?: any[];
-  totals?: any;
-  b2b: Array<{
-    invoice_number: string;
-    date: string;
-    customer_name: string;
-    gstin?: string;
-    place_of_supply: string;
-    taxable_amount: number;
-    igst: number;
-    cgst: number;
-    sgst: number;
-    cess?: number;
-    total_amount: number;
-  }>;
-  b2cl: Array<{
-    invoice_number: string;
-    date: string;
-    customer_name: string;
-    gstin?: string;
-    place_of_supply: string;
-    taxable_amount: number;
-    igst: number;
-    cgst: number;
-    sgst: number;
-    cess?: number;
-    total_amount: number;
-  }>;
-  b2cs: Array<{
-    invoice_number: string;
-    date: string;
-    customer_name: string;
-    gstin?: string;
-    place_of_supply: string;
-    taxable_amount: number;
-    igst: number;
-    cgst: number;
-    sgst: number;
-    cess?: number;
-    total_amount: number;
-  }>;
+  rows?: Gstr1Row[];
+  totals?: {
+    totalTaxableAmount?: number;
+    totalIgst?: number;
+    totalCgst?: number;
+    totalSgst?: number;
+    totalCess?: number;
+    totalInvoiceValue?: number;
+    total_amount?: number;
+  };
+  b2b: Gstr1Row[];
+  b2cl: Gstr1Row[];
+  b2cs: Gstr1Row[];
+}
+
+export interface Gstr2Row {
+  invoice_number?: string;
+  invoiceNumber?: string;
+  date?: string;
+  invoiceDate?: string;
+  supplier_name?: string;
+  supplierName?: string;
+  partyName?: string;
+  gstin?: string;
+  place_of_supply?: string;
+  placeOfSupply?: string;
+  taxable_amount?: number;
+  taxableValue?: number;
+  igst?: number;
+  igstAmount?: number;
+  cgst?: number;
+  cgstAmount?: number;
+  sgst?: number;
+  sgstAmount?: number;
+  cess?: number;
+  itc_eligible?: boolean;
+  itcEligible?: boolean;
+  total_amount?: number;
+  invoiceValue?: number;
 }
 
 export interface Gstr2ReportData {
@@ -492,20 +524,16 @@ export interface Gstr2ReportData {
     total_itc_available: number;
     total_amount: number;
   };
-  rows?: any[];
-  totals?: any;
-  inward_supplies: Array<{
-    invoice_number: string;
-    date: string;
-    supplier_name: string;
-    gstin?: string;
-    place_of_supply: string;
-    taxable_amount: number;
-    igst: number;
-    cgst: number;
-    sgst: number;
-    cess?: number;
-    itc_eligible: boolean;
-    total_amount: number;
-  }>;
+  rows?: Gstr2Row[];
+  totals?: {
+    totalTaxableAmount?: number;
+    totalIgst?: number;
+    totalCgst?: number;
+    totalSgst?: number;
+    totalCess?: number;
+    totalItcAvailable?: number;
+    totalInvoiceValue?: number;
+    total_amount?: number;
+  };
+  inward_supplies: Gstr2Row[];
 }

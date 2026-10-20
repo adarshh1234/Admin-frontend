@@ -1,5 +1,6 @@
 import { forwardRef } from 'react';
 import { Button } from '../common/Button';
+import { useAuth } from '../../context/AuthContext';
 
 interface TopBarProps {
   onHamburgerClick: () => void;
@@ -10,6 +11,10 @@ export const TopBar = forwardRef<HTMLButtonElement, TopBarProps>(function TopBar
   { onHamburgerClick, onGlobalAction },
   hamburgerRef,
 ) {
+  const { user, isSuperAdmin, logout } = useAuth();
+  const displayName = user?.displayName || user?.username || 'Executive User';
+  const roleName = user?.role || 'ERP User';
+
   return (
     <div className="topbar">
       <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
@@ -18,10 +23,11 @@ export const TopBar = forwardRef<HTMLButtonElement, TopBarProps>(function TopBar
         </Button>
         <div className="greeting">
           <h1 id="pageTitle">
-            Welcome back, <span>labeeb.eee_candidate</span>
+            Welcome back, <span>{displayName}</span>
           </h1>
           <p id="pageSubtitle">
-            <i className="fas fa-shield-alt" style={{ color: '#2563eb', marginRight: 6 }} /> ERP · Full Module Navigation
+            <i className="fas fa-shield-alt" style={{ color: '#2563eb', marginRight: 6 }} />
+            {roleName} · ERP Full Module Navigation
           </p>
         </div>
       </div>
@@ -30,11 +36,23 @@ export const TopBar = forwardRef<HTMLButtonElement, TopBarProps>(function TopBar
         <Button variant="primary" id="globalActionBtn" onClick={onGlobalAction}>
           <i className="fas fa-plus" /> New
         </Button>
-        <div className="topbar-user-avatar" title="labeeb.eee_candidate">
+        <div className="topbar-user-avatar" title={`${displayName} (${roleName})`}>
           <i className="fas fa-user" />
         </div>
+        <Button
+          variant="outline"
+          onClick={async () => {
+            const wasSuperAdmin = isSuperAdmin;
+            await logout();
+            window.location.pathname = wasSuperAdmin ? '/super-admin/login' : '/admin/login';
+          }}
+          style={{ fontSize: '12px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+          title="Sign out of ERP session"
+        >
+          <i className="fas fa-sign-out-alt" />
+          <span>Sign Out</span>
+        </Button>
       </div>
     </div>
   );
 });
-

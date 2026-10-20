@@ -1,7 +1,7 @@
 import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline' | 'success';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -9,6 +9,10 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   size?: ButtonSize;
   children?: ReactNode;
   className?: string;
+  icon?: ReactNode;
+  iconPosition?: 'left' | 'right';
+  loading?: boolean;
+  loadingText?: string;
 }
 
 const VARIANT_CLASS_MAP: Record<ButtonVariant, string> = {
@@ -17,6 +21,7 @@ const VARIANT_CLASS_MAP: Record<ButtonVariant, string> = {
   outline: 'btn-outline',
   ghost: 'btn-ghost',
   danger: 'btn-danger',
+  success: 'btn-success',
 };
 
 const SIZE_CLASS_MAP: Record<ButtonSize, string> = {
@@ -31,6 +36,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     size,
     type = 'button',
     disabled,
+    loading = false,
+    loadingText,
+    icon,
+    iconPosition = 'left',
     onClick,
     children,
     className = '',
@@ -42,16 +51,31 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   const sizeClass = size ? SIZE_CLASS_MAP[size] || '' : '';
   const combinedClass = [variantClass, sizeClass, className].filter(Boolean).join(' ');
 
+  const isDisabled = disabled || loading;
+
   return (
     <button
       ref={ref}
       type={type}
-      disabled={disabled}
+      disabled={isDisabled}
       onClick={onClick}
       className={combinedClass || undefined}
       {...rest}
     >
-      {children}
+      {loading ? (
+        <>
+          <i className="fas fa-circle-notch fa-spin" style={{ marginRight: loadingText || children ? 8 : 0 }} />
+          {loadingText ?? children}
+        </>
+      ) : (
+        <>
+          {icon && iconPosition === 'left' && <span style={{ marginRight: children ? 6 : 0 }}>{icon}</span>}
+          {children}
+          {icon && iconPosition === 'right' && <span style={{ marginLeft: children ? 6 : 0 }}>{icon}</span>}
+        </>
+      )}
     </button>
   );
 });
+
+export default Button;

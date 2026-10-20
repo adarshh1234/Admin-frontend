@@ -106,6 +106,56 @@ export default function MISKPICards() {
         <div className="mis-kpi-value">{k.highPotential}</div>
         <div className="mis-kpi-sub">High potential tiers</div>
       </div>
+
+      <div className="mis-kpi-card mis-kpi-card-interactive" onClick={() => navigate('/cash-flow')}>
+        <div className="mis-kpi-header">
+          <div className="mis-kpi-label">
+            <span className="mis-kpi-icon"><i className="fas fa-money-bill-wave" /></span> Cash Flow
+          </div>
+        </div>
+        <div className="mis-kpi-value">₹{k.cashFlow.toLocaleString()}</div>
+        <div className="mis-kpi-sub">Monthly Net Cash Flow</div>
+      </div>
+
+      <div className="mis-kpi-card mis-kpi-card-interactive" onClick={() => navigate('/rois')}>
+        <div className="mis-kpi-header">
+          <div className="mis-kpi-label">
+            <span className="mis-kpi-icon" style={{ background: '#d1fae5', color: '#16a34a' }}><i className="fas fa-percentage" /></span> ROIs
+          </div>
+        </div>
+        <div className="mis-kpi-value" style={{ color: '#16a34a' }}>{k.rois}%</div>
+        <div className="mis-kpi-sub">Overall Return</div>
+      </div>
+
+      <div className="mis-kpi-card mis-kpi-card-interactive" onClick={() => navigate('/assets')}>
+        <div className="mis-kpi-header">
+          <div className="mis-kpi-label">
+            <span className="mis-kpi-icon"><i className="fas fa-boxes" /></span> Assets
+          </div>
+        </div>
+        <div className="mis-kpi-value">₹{k.assets.toLocaleString()}</div>
+        <div className="mis-kpi-sub">Total Assets</div>
+      </div>
+
+      <div className="mis-kpi-card mis-kpi-card-interactive" onClick={() => navigate('/liquidity')}>
+        <div className="mis-kpi-header">
+          <div className="mis-kpi-label">
+            <span className="mis-kpi-icon"><i className="fas fa-hand-holding-usd" /></span> Liquidity
+          </div>
+        </div>
+        <div className="mis-kpi-value">₹{k.liquidity.toLocaleString()}</div>
+        <div className="mis-kpi-sub">Available Liquidity</div>
+      </div>
+
+      <div className="mis-kpi-card mis-kpi-card-interactive" onClick={() => navigate('/revenue')}>
+        <div className="mis-kpi-header">
+          <div className="mis-kpi-label">
+            <span className="mis-kpi-icon"><i className="fas fa-chart-line" /></span> Revenue
+          </div>
+        </div>
+        <div className="mis-kpi-value">₹{k.revenue.toLocaleString()}</div>
+        <div className="mis-kpi-sub">Current Period Revenue</div>
+      </div>
     </section>
   );
 }
