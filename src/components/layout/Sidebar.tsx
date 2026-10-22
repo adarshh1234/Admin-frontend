@@ -1,4 +1,4 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, useState, useEffect } from 'react';
 import type { ModuleItem } from '../../types/module';
 import { Button } from '../common/Button';
 import { Input } from '../common/Input';
@@ -40,6 +40,18 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
   const [cmsExpanded, setCmsExpanded] = useState<boolean>(true);
   const collapsed = isCollapsed && !isHoverExpanded;
 
+  useEffect(() => {
+    if (!userMenuOpen) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest('.user-card')) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('click', handleOutsideClick);
+    return () => document.removeEventListener('click', handleOutsideClick);
+  }, [userMenuOpen]);
+
   return (
     <div className={`sidebar-wrapper${isOpen ? ' open' : ''}${isCollapsed ? ' collapsed' : ''}`}>
       <aside
@@ -47,10 +59,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
         id="sidebar"
         ref={ref}
         onMouseEnter={onMouseEnter}
-        onMouseLeave={() => {
-          onMouseLeave();
-          setUserMenuOpen(false);
-        }}
+        onMouseLeave={onMouseLeave}
       >
         <div className="logo">
           <span className="logo-text">E.</span>
@@ -238,17 +247,21 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
                     </div>
                     <div className="role">{displayRole}</div>
                   </div>
-                  <Button
+                  <button
                     type="button"
+                    id="adminAccountMenuBtn"
                     className="user-card-menu-btn"
-                    onClick={() => setUserMenuOpen((prev) => !prev)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setUserMenuOpen((prev) => !prev);
+                    }}
                     title="Account options"
                   >
                     <i className="fas fa-ellipsis-v" />
-                  </Button>
+                  </button>
 
                   {userMenuOpen && (
-                    <div className="user-card-dropdown">
+                    <div className="user-card-dropdown" id="adminAccountDropdown">
                       <div className="user-dropdown-header">
                         <div className="user-dropdown-name">{displayName}</div>
                         <div className="user-dropdown-email">{displayEmail}</div>
@@ -257,10 +270,24 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
                         </div>
                       </div>
                       <div className="user-dropdown-divider" />
-                      <Button
+                      <button
+                        type="button"
+                        id="adminProfileMenuBtn"
+                        className="user-dropdown-item profile-btn"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setUserMenuOpen(false);
+                          onSelectModule(2);
+                        }}
+                      >
+                        <i className="fas fa-user" />
+                        <span>Profile</span>
+                      </button>
+                      <button
                         type="button"
                         className="user-dropdown-item signout-btn"
-                        onClick={async () => {
+                        onClick={async (e) => {
+                          e.stopPropagation();
                           setUserMenuOpen(false);
                           if (window.confirm('Are you sure you want to sign out?')) {
                             const wasSuperAdmin = isSuperAdmin;
@@ -271,7 +298,7 @@ export const Sidebar = forwardRef<HTMLElement, SidebarProps>(function Sidebar(
                       >
                         <i className="fas fa-sign-out-alt" />
                         <span>Sign Out</span>
-                      </Button>
+                      </button>
                     </div>
                   )}
                 </>

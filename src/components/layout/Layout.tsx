@@ -72,6 +72,7 @@ export function Layout({
           ref={hamburgerRef}
           onHamburgerClick={toggle}
           onGlobalAction={onGlobalAction}
+          showActions={activeModuleId !== 1}
         />
         {children}
         <div
