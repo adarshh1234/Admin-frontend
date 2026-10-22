@@ -5,10 +5,11 @@ import { useAuth } from '../../context/AuthContext';
 interface TopBarProps {
   onHamburgerClick: () => void;
   onGlobalAction: () => void;
+  showActions?: boolean;
 }
 
 export const TopBar = forwardRef<HTMLButtonElement, TopBarProps>(function TopBar(
-  { onHamburgerClick, onGlobalAction },
+  { onHamburgerClick, onGlobalAction, showActions = true },
   hamburgerRef,
 ) {
   const { user, isSuperAdmin, logout } = useAuth();
@@ -32,27 +33,29 @@ export const TopBar = forwardRef<HTMLButtonElement, TopBarProps>(function TopBar
         </div>
       </div>
 
-      <div className="actions">
-        <Button variant="primary" id="globalActionBtn" onClick={onGlobalAction}>
-          <i className="fas fa-plus" /> New
-        </Button>
-        <div className="topbar-user-avatar" title={`${displayName} (${roleName})`}>
-          <i className="fas fa-user" />
+      {showActions && (
+        <div className="actions">
+          <Button variant="primary" id="globalActionBtn" onClick={onGlobalAction}>
+            <i className="fas fa-plus" /> New
+          </Button>
+          <div className="topbar-user-avatar" title={`${displayName} (${roleName})`}>
+            <i className="fas fa-user" />
+          </div>
+          <Button
+            variant="outline"
+            onClick={async () => {
+              const wasSuperAdmin = isSuperAdmin;
+              await logout();
+              window.location.pathname = wasSuperAdmin ? '/super-admin/login' : '/admin/login';
+            }}
+            style={{ fontSize: '12px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
+            title="Sign out of ERP session"
+          >
+            <i className="fas fa-sign-out-alt" />
+            <span>Sign Out</span>
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          onClick={async () => {
-            const wasSuperAdmin = isSuperAdmin;
-            await logout();
-            window.location.pathname = wasSuperAdmin ? '/super-admin/login' : '/admin/login';
-          }}
-          style={{ fontSize: '12px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}
-          title="Sign out of ERP session"
-        >
-          <i className="fas fa-sign-out-alt" />
-          <span>Sign Out</span>
-        </Button>
-      </div>
+      )}
     </div>
   );
 });

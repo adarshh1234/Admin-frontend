@@ -40,6 +40,9 @@ const HuremasoApp = lazy(() =>
 const UserManagementPage = lazy(() =>
   import('./components/pages/UserManagementPage').then((m) => ({ default: m.UserManagementPage })),
 );
+const CreditManagementPage = lazy(() =>
+  import('./components/pages/CreditManagementPage').then((m) => ({ default: m.CreditManagementPage })),
+);
 const AdminPage = lazy(() =>
   import('./components/admin/AdminPage').then((m) => ({ default: m.AdminPage })),
 );
@@ -230,6 +233,8 @@ function AppShell() {
         return <CashFlowSectionPage />;
       case 9:
         return <UserManagementPage onNavigateDashboard={() => navigateTo(1)} />;
+      case 43:
+        return <CreditManagementPage onNavigateDashboard={() => navigateTo(1)} />;
       case 53:
         return <AdminPage onNavigateDashboard={() => navigateTo(1)} onNavigateModule={handleSelectModule} />;
       case 10:
