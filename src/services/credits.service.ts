@@ -265,6 +265,27 @@ export const creditsService = {
     }
     return json;
   },
+
+  /**
+   * Toggle global Payments & Credits feature (Super Admin only)
+   */
+  async togglePaymentsCredits(payload: { enabled: boolean; reason?: string }): Promise<{
+    paymentsCreditsEnabled: boolean;
+    paymentsCreditsDisabledReason?: string;
+    paymentsCreditsDisabledAt?: string | null;
+    paymentsCreditsDisabledBy?: string;
+  }> {
+    const res = await fetch(`${API_BASE_URL}/api/credits/pricing/toggle-payments`, {
+      method: 'POST',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(payload),
+    });
+    const json = await res.json();
+    if (!res.ok || !json.success) {
+      throw new Error(json.message || 'Failed to toggle payments & credits feature');
+    }
+    return json.data;
+  },
 };
 
 export default creditsService;

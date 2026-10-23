@@ -119,6 +119,10 @@ export interface CreditPricingConfigData {
   institutionPlans?: PlanCategoryGroup[];
   status?: 'published' | 'draft';
   draftData?: any;
+  paymentsCreditsEnabled?: boolean;
+  paymentsCreditsDisabledReason?: string;
+  paymentsCreditsDisabledAt?: string | null;
+  paymentsCreditsDisabledBy?: string;
   auditLog: PricingAuditEntry[];
   lastUpdatedBy?: string;
   lastUpdatedByRole?: string;

@@ -53,6 +53,50 @@ export const CreditPlansPricingView: React.FC<CreditPlansPricingViewProps> = ({
   const [isAuditModalOpen, setIsAuditModalOpen] = useState<boolean>(false);
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState<boolean>(false);
 
+  // Global Payments & Credits Kill Switch
+  const [isTogglePaymentsModalOpen, setIsTogglePaymentsModalOpen] = useState<boolean>(false);
+  const [togglingPayments, setTogglingPayments] = useState<boolean>(false);
+  const [togglePaymentsReason, setTogglePaymentsReason] = useState<string>('');
+
+  const paymentsCreditsEnabled = config?.paymentsCreditsEnabled !== false;
+
+  const handleTogglePayments = async () => {
+    try {
+      setTogglingPayments(true);
+      const targetState = !paymentsCreditsEnabled;
+      const res = await creditsService.togglePaymentsCredits({
+        enabled: targetState,
+        reason: togglePaymentsReason.trim() || undefined,
+      });
+
+      showToast(
+        targetState
+          ? 'Payments and credits have been successfully enabled platform-wide.'
+          : 'Payments and credits have been temporarily disabled platform-wide.',
+        targetState ? 'success' : 'warning'
+      );
+
+      setConfig((prev) =>
+        prev
+          ? {
+              ...prev,
+              paymentsCreditsEnabled: res.paymentsCreditsEnabled,
+              paymentsCreditsDisabledReason: res.paymentsCreditsDisabledReason,
+              paymentsCreditsDisabledAt: res.paymentsCreditsDisabledAt,
+              paymentsCreditsDisabledBy: res.paymentsCreditsDisabledBy,
+            }
+          : prev
+      );
+      setIsTogglePaymentsModalOpen(false);
+      setTogglePaymentsReason('');
+      await loadPricingData();
+    } catch (err: any) {
+      showToast(err.message || 'Failed to update payments and credits state.', 'error');
+    } finally {
+      setTogglingPayments(false);
+    }
+  };
+
   // Load authoritative pricing config from backend
   const loadPricingData = useCallback(async () => {
     try {
@@ -430,8 +474,102 @@ export const CreditPlansPricingView: React.FC<CreditPlansPricingViewProps> = ({
           >
             <i className="fas fa-paper-plane" style={{ marginRight: 6 }} /> Publish LIVE
           </Button>
+
+          {/* Global Payment & Credits Kill Switch */}
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsTogglePaymentsModalOpen(true)}
+            disabled={togglingPayments || saving || publishing}
+            style={{
+              borderColor: paymentsCreditsEnabled ? 'rgba(239, 68, 68, 0.45)' : 'rgba(16, 185, 129, 0.55)',
+              color: '#ffffff',
+              background: paymentsCreditsEnabled ? 'rgba(239, 68, 68, 0.22)' : 'rgba(16, 185, 129, 0.28)',
+              fontSize: 13,
+              fontWeight: 700,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 6,
+              boxShadow: paymentsCreditsEnabled ? '0 0 10px rgba(239, 68, 68, 0.2)' : '0 0 10px rgba(16, 185, 129, 0.25)',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            {togglingPayments ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <i className="fas fa-circle-notch fa-spin" /> Updating...
+              </span>
+            ) : paymentsCreditsEnabled ? (
+              <>
+                <i className="fas fa-ban" /> Disable Payments & Credits
+              </>
+            ) : (
+              <>
+                <i className="fas fa-check-circle" /> Enable Payments & Credits
+              </>
+            )}
+          </Button>
         </div>
       </div>
+
+      {/* Global Kill Switch Disabled Notice Banner */}
+      {!paymentsCreditsEnabled && (
+        <div
+          style={{
+            background: 'linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)',
+            border: '1px solid #fca5a5',
+            borderRadius: 14,
+            padding: '14px 20px',
+            marginBottom: 20,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 16,
+            boxShadow: '0 2px 6px rgba(239, 68, 68, 0.08)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 10,
+                background: '#fee2e2',
+                color: '#dc2626',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: 16,
+                flexShrink: 0,
+              }}
+            >
+              <i className="fas fa-exclamation-triangle" />
+            </div>
+            <div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: '#991b1b' }}>
+                Platform Payments & Credits Are Temporarily Disabled
+              </div>
+              <div style={{ fontSize: 12, color: '#b91c1c', marginTop: 2 }}>
+                {config?.paymentsCreditsDisabledReason || 'New purchases, credit top-ups, paid subscriptions, and new paid premium operations are currently blocked.'} Existing user balances and records are preserved.
+              </div>
+            </div>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setIsTogglePaymentsModalOpen(true)}
+            style={{
+              borderColor: '#dc2626',
+              color: '#dc2626',
+              background: '#ffffff',
+              fontSize: 12,
+              fontWeight: 700,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <i className="fas fa-check-circle" style={{ marginRight: 6 }} /> Re-Enable
+          </Button>
+        </div>
+      )}
 
       {/* Four Category Tabs */}
       <div
@@ -1036,6 +1174,18 @@ export const CreditPlansPricingView: React.FC<CreditPlansPricingViewProps> = ({
           categoryTitle={categoryLabels[activeCategory].title}
           onClose={() => setIsResetConfirmOpen(false)}
           onConfirm={handleResetDefaults}
+        />
+      )}
+
+      {/* KILL SWITCH CONFIRMATION MODAL */}
+      {isTogglePaymentsModalOpen && (
+        <TogglePaymentsModal
+          currentEnabled={paymentsCreditsEnabled}
+          reason={togglePaymentsReason}
+          setReason={setTogglePaymentsReason}
+          onClose={() => setIsTogglePaymentsModalOpen(false)}
+          onConfirm={handleTogglePayments}
+          isSubmitting={togglingPayments}
         />
       )}
     </div>
@@ -1912,6 +2062,147 @@ const ResetConfirmModal: React.FC<ResetConfirmModalProps> = ({ categoryTitle, on
             onClick={onConfirm}
           >
             Yes, Reset Defaults
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ---------------------------------------------------------------------------
+// SUB-MODAL: Global Payments & Credits Kill Switch Confirm
+// ---------------------------------------------------------------------------
+interface TogglePaymentsModalProps {
+  currentEnabled: boolean;
+  reason: string;
+  setReason: (val: string) => void;
+  onClose: () => void;
+  onConfirm: () => void;
+  isSubmitting: boolean;
+}
+
+const TogglePaymentsModal: React.FC<TogglePaymentsModalProps> = ({
+  currentEnabled,
+  reason,
+  setReason,
+  onClose,
+  onConfirm,
+  isSubmitting,
+}) => {
+  return (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(9, 30, 66, 0.54)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1050,
+        padding: 16,
+      }}
+    >
+      <div
+        style={{
+          background: '#ffffff',
+          borderRadius: 16,
+          width: '100%',
+          maxWidth: 480,
+          boxShadow: '0 20px 40px rgba(0,0,0,0.18)',
+          overflow: 'hidden',
+          padding: '24px 24px',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+          <div
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: 12,
+              background: currentEnabled ? '#fef2f2' : '#ecfdf5',
+              color: currentEnabled ? '#ef4444' : '#10b981',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: 20,
+              flexShrink: 0,
+            }}
+          >
+            <i className={currentEnabled ? 'fas fa-power-off' : 'fas fa-check-circle'} />
+          </div>
+          <div>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#091e42' }}>
+              {currentEnabled ? 'Disable payments and credits platform-wide?' : 'Enable payments and credits platform-wide?'}
+            </h3>
+            <p style={{ margin: '2px 0 0', fontSize: 12, color: '#64748b' }}>
+              Centralized Super Admin Kill Switch Control
+            </p>
+          </div>
+        </div>
+
+        <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.55, marginBottom: 16 }}>
+          {currentEnabled
+            ? 'New purchases, credit top-ups, paid subscriptions, and new paid premium operations will be temporarily unavailable for all account categories. Existing balances and transaction records will remain unchanged.'
+            : 'Restore all payment checkout sessions, credit purchases, paid subscriptions, and premium credit-consuming operations for all account categories across the platform.'}
+        </p>
+
+        <div style={{ marginBottom: 20 }}>
+          <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: '#334155', marginBottom: 6 }}>
+            Reason for this change (recorded in Audit Trail):
+          </label>
+          <input
+            type="text"
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder={
+              currentEnabled
+                ? 'e.g. Scheduled platform maintenance, payment gateway audit, or temporary pause'
+                : 'e.g. Platform maintenance completed, resuming standard operations'
+            }
+            style={{
+              width: '100%',
+              padding: '10px 12px',
+              borderRadius: 8,
+              border: '1px solid #cbd5e1',
+              fontSize: 13,
+              outline: 'none',
+              boxSizing: 'border-box',
+            }}
+          />
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+          <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            variant={currentEnabled ? 'danger' : 'primary'}
+            onClick={onConfirm}
+            disabled={isSubmitting}
+            style={
+              !currentEnabled
+                ? {
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    borderColor: '#059669',
+                    fontWeight: 700,
+                  }
+                : {
+                    background: '#dc2626',
+                    borderColor: '#dc2626',
+                    fontWeight: 700,
+                  }
+            }
+          >
+            {isSubmitting ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <i className="fas fa-circle-notch fa-spin" /> Processing...
+              </span>
+            ) : currentEnabled ? (
+              'Confirm Disable'
+            ) : (
+              'Confirm Enable'
+            )}
           </Button>
         </div>
       </div>
