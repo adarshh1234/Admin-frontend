@@ -238,7 +238,7 @@
       background: #f1f5f9;
       margin: 6px 0;
     }
-    .user-dropdown-item.signout-btn {
+    .user-dropdown-item {
       width: 100%;
       display: flex;
       align-items: center;
@@ -247,11 +247,29 @@
       border-radius: 8px;
       border: none;
       background: transparent;
-      color: #ef4444;
+      color: #334155;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 500;
       cursor: pointer;
       transition: all 0.15s ease;
+      text-align: left;
+    }
+    .user-dropdown-item:hover {
+      background: #f1f5f9;
+      color: #0265c2;
+    }
+    .user-dropdown-item.profile-btn {
+      color: #0b1a33;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+    .user-dropdown-item.profile-btn:hover {
+      background: #eff6ff;
+      color: #0265c2;
+    }
+    .user-dropdown-item.signout-btn {
+      color: #ef4444;
+      font-weight: 600;
     }
     .user-dropdown-item.signout-btn:hover {
       background: #fee2e2;
@@ -2790,6 +2808,15 @@ textarea.form-control {
     flex-shrink: 0;
     padding: 8px 14px;
     font-size: 13px;
+  }
+
+  .dashboard-hero-banner {
+    padding: 20px 18px !important;
+    border-radius: 16px !important;
+    margin-bottom: 20px !important;
+  }
+  .dashboard-hero-banner h2 {
+    font-size: 20px !important;
   }
 
   .stats {

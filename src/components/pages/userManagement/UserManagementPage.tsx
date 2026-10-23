@@ -9,17 +9,25 @@ import { AddUserModal } from './modals/AddUserModal';
 import { EditUserModal } from './modals/EditUserModal';
 import { ResetPasswordModal } from './modals/ResetPasswordModal';
 import { ConfirmActionModal } from './modals/ConfirmActionModal';
+import { CreditPlansPricingView } from './CreditPlansPricingView';
 
 interface UserManagementPageProps {
   onNavigateDashboard?: () => void;
+  initialSubTab?: 'staff' | 'admins';
 }
 
-export const UserManagementPage: React.FC<UserManagementPageProps> = ({ onNavigateDashboard }) => {
+export const UserManagementPage: React.FC<UserManagementPageProps> = ({
+  onNavigateDashboard,
+  initialSubTab,
+}) => {
   const { user: currentUser, isSuperAdmin, isAdmin } = useAuth();
   const { showToast } = useToast();
 
-  // Active Tab: 'staff' for everyone; 'admins' only available to Super Admin
-  const [activeTab, setActiveTab] = useState<'staff' | 'admins'>('staff');
+  // Active Tab: 'staff' or 'admins' (Super Admin)
+  const [activeTab, setActiveTab] = useState<'staff' | 'admins'>(() => {
+    if (initialSubTab) return initialSubTab;
+    return 'staff';
+  });
 
   // State
   const [users, setUsers] = useState<UserAccount[]>([]);
@@ -281,6 +289,90 @@ export const UserManagementPage: React.FC<UserManagementPageProps> = ({ onNaviga
         </div>
       </div>
 
+      {/* Navigation Tabs (Staff vs Admin) */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          background: '#ffffff',
+          padding: '6px',
+          borderRadius: '12px',
+          border: '1px solid #e2e8f0',
+          marginBottom: '20px',
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setActiveTab('staff')}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            padding: '9px 18px',
+            borderRadius: '8px',
+            border: 'none',
+            background: activeTab === 'staff' ? 'linear-gradient(135deg, #091e42, #0052cc)' : 'transparent',
+            color: activeTab === 'staff' ? '#ffffff' : '#64748b',
+            fontWeight: activeTab === 'staff' ? 700 : 500,
+            fontSize: '13px',
+            cursor: 'pointer',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          <i className="fas fa-users" />
+          <span>Staff Accounts</span>
+          <span
+            style={{
+              background: activeTab === 'staff' ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
+              color: activeTab === 'staff' ? '#ffffff' : '#475569',
+              padding: '2px 7px',
+              borderRadius: '10px',
+              fontSize: '11px',
+              fontWeight: 600,
+            }}
+          >
+            {users.filter((u) => u.role !== 'Admin' && u.role !== 'ADMIN').length}
+          </span>
+        </button>
+
+        {isSuperAdmin && (
+          <button
+            type="button"
+            onClick={() => setActiveTab('admins')}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '9px 18px',
+              borderRadius: '8px',
+              border: 'none',
+              background: activeTab === 'admins' ? 'linear-gradient(135deg, #091e42, #0052cc)' : 'transparent',
+              color: activeTab === 'admins' ? '#ffffff' : '#64748b',
+              fontWeight: activeTab === 'admins' ? 700 : 500,
+              fontSize: '13px',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease',
+            }}
+          >
+            <i className="fas fa-user-shield" />
+            <span>Administrator Accounts</span>
+            <span
+              style={{
+                background: activeTab === 'admins' ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
+                color: activeTab === 'admins' ? '#ffffff' : '#475569',
+                padding: '2px 7px',
+                borderRadius: '10px',
+                fontSize: '11px',
+                fontWeight: 600,
+              }}
+            >
+              {users.filter((u) => u.role === 'Admin' || u.role === 'ADMIN').length}
+            </span>
+          </button>
+        )}
+      </div>
+
       {/* KPI Dashboard Cards */}
       <div
         style={{
@@ -443,90 +535,6 @@ export const UserManagementPage: React.FC<UserManagementPageProps> = ({ onNaviga
             </div>
           </div>
         </div>
-      </div>
-
-      {/* Navigation Tabs (Staff vs Admin) */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          background: '#ffffff',
-          padding: '6px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          marginBottom: '20px',
-        }}
-      >
-        <button
-          type="button"
-          onClick={() => setActiveTab('staff')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '9px 18px',
-            borderRadius: '8px',
-            border: 'none',
-            background: activeTab === 'staff' ? 'linear-gradient(135deg, #091e42, #0052cc)' : 'transparent',
-            color: activeTab === 'staff' ? '#ffffff' : '#64748b',
-            fontWeight: activeTab === 'staff' ? 700 : 500,
-            fontSize: '13px',
-            cursor: 'pointer',
-            transition: 'all 0.15s ease',
-          }}
-        >
-          <i className="fas fa-users" />
-          <span>Staff Accounts</span>
-          <span
-            style={{
-              background: activeTab === 'staff' ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
-              color: activeTab === 'staff' ? '#ffffff' : '#475569',
-              padding: '2px 7px',
-              borderRadius: '10px',
-              fontSize: '11px',
-              fontWeight: 600,
-            }}
-          >
-            {users.filter((u) => u.role !== 'Admin' && u.role !== 'ADMIN').length}
-          </span>
-        </button>
-
-        {isSuperAdmin && (
-          <button
-            type="button"
-            onClick={() => setActiveTab('admins')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '9px 18px',
-              borderRadius: '8px',
-              border: 'none',
-              background: activeTab === 'admins' ? 'linear-gradient(135deg, #091e42, #0052cc)' : 'transparent',
-              color: activeTab === 'admins' ? '#ffffff' : '#64748b',
-              fontWeight: activeTab === 'admins' ? 700 : 500,
-              fontSize: '13px',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease',
-            }}
-          >
-            <i className="fas fa-user-shield" />
-            <span>Administrator Accounts</span>
-            <span
-              style={{
-                background: activeTab === 'admins' ? 'rgba(255,255,255,0.25)' : '#f1f5f9',
-                color: activeTab === 'admins' ? '#ffffff' : '#475569',
-                padding: '2px 7px',
-                borderRadius: '10px',
-                fontSize: '11px',
-                fontWeight: 600,
-              }}
-            >
-              {users.filter((u) => u.role === 'Admin' || u.role === 'ADMIN').length}
-            </span>
-          </button>
-        )}
       </div>
 
       {/* Search & Filter Toolbar */}

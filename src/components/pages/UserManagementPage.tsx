@@ -7,6 +7,7 @@ import {
   CandidatesTab,
   BulkCandidatesTab,
   HrmsTab,
+  CreditPlansPricingView,
   type UMTab,
   type UserManagementPageProps,
   type UserManagementTabbedViewProps,
@@ -19,6 +20,7 @@ export {
   CandidatesTab,
   BulkCandidatesTab,
   HrmsTab,
+  CreditPlansPricingView,
 };
 export type { UMTab, CandidateSubTab } from './userManagement';
 
@@ -111,8 +113,8 @@ export function UserManagementTabbedView({
 // ---------------------------------------------------------------------------
 // MAIN USER MANAGEMENT PAGE
 // ---------------------------------------------------------------------------
-export function UserManagementPage({ onNavigateDashboard }: UserManagementPageProps) {
-  return <FullUserManagementPage onNavigateDashboard={onNavigateDashboard} />;
+export function UserManagementPage({ onNavigateDashboard, initialSubTab }: UserManagementPageProps) {
+  return <FullUserManagementPage onNavigateDashboard={onNavigateDashboard} initialSubTab={initialSubTab} />;
 }
 
 export default UserManagementPage;

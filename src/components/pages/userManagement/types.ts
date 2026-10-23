@@ -14,6 +14,7 @@ export interface UserManagementTabbedViewProps {
 
 export interface UserManagementPageProps {
   onNavigateDashboard?: () => void;
+  initialSubTab?: 'staff' | 'admins';
 }
 
 export interface FresherCandidate {
